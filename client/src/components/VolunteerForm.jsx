@@ -1,17 +1,33 @@
 import { useState } from "react";
-import { Volunteers } from "../api.js";
 
 export default function VolunteerForm() {
   const [name, setName] = useState("");
-  const [skills, setSkills] = useState("");
+  const [role, setRole] = useState("");
+  const [contact, setContact] = useState("");
+  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newVolunteer = await Volunteers.add({ name, skills });
-    setMessage(`Thanks ${newVolunteer.name}, you’ve been added!`);
-    setName("");
-    setSkills("");
+    try {
+      const res = await fetch("http://localhost:5000/api/volunteers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, role, contact, email }),
+      });
+
+      if (!res.ok) throw new Error("Failed to add volunteer");
+
+      const newVolunteer = await res.json();
+      setMessage(`Thanks ${newVolunteer.name}, you’ve been added!`);
+      setName("");
+      setRole("");
+      setContact("");
+      setEmail("");
+    } catch (err) {
+      setMessage("Failed to add volunteer. Try again!");
+      console.error(err);
+    }
   };
 
   return (
@@ -28,9 +44,25 @@ export default function VolunteerForm() {
         />
         <input
           type="text"
-          value={skills}
-          onChange={(e) => setSkills(e.target.value)}
-          placeholder="Your skills"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          placeholder="Your role (e.g., Medical, Rescue)"
+          className="w-full p-2 border rounded-lg"
+          required
+        />
+        <input
+          type="tel"
+          value={contact}
+          onChange={(e) => setContact(e.target.value.replace(/\D/g, ""))}
+          placeholder="Your contact number"
+          className="w-full p-2 border rounded-lg"
+          required
+        />
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Your email"
           className="w-full p-2 border rounded-lg"
           required
         />
