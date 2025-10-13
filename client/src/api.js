@@ -1,92 +1,91 @@
 // client/src/api.js
+const BASE_URL = "http://localhost:5000";
 
-// Fake API function that returns tips
-const tipsData = [
-  {
-    _id: 1,
-    title: "Stay Calm",
-    content: "Stay calm and avoid panic during an emergency.",
-    disasterType: "General"
-  },
-  {
-    _id: 2,
-    title: "Emergency Kit",
-    content: "Keep a disaster emergency kit ready at home.",
-    disasterType: "Preparedness"
-  },
-  {
-    _id: 3,
-    title: "Listen to Authorities",
-    content: "Follow evacuation orders and instructions from officials.",
-    disasterType: "Evacuation"
-  }
-];
-
-export const Tips = {
-  list: async () => {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(tipsData), 500);
-    });
-  }
-};
-
-// Fake API function that returns alerts
-const alertsData = [
-  {
-    _id: 1,
-    message: "Flood warning in your area",
-    severity: "High"
-  },
-  {
-    _id: 2,
-    message: "Heatwave expected tomorrow",
-    severity: "Moderate"
-  }
-];
-
+// -------------------- ALERTS --------------------
 export const Alerts = {
-  list: async () => {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(alertsData), 500);
-    });
-  }
-};
-
-// 🔹 Fake API function that manages volunteers
-const volunteersData = [
-  { _id: 1, name: "John Doe", skills: "First Aid" },
-  { _id: 2, name: "Jane Smith", skills: "Rescue Operations" }
-];
-
-export const Volunteers = {
-  list: async () => {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(volunteersData), 500);
-    });
+  async list() {
+    const res = await fetch(`${BASE_URL}/api/alerts`);
+    return res.json();
   },
-  add: async (volunteer) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const newVolunteer = { _id: Date.now(), ...volunteer };
-        volunteersData.push(newVolunteer);
-        resolve(newVolunteer);
-      }, 500);
-    });
-  }
-};
-// client/src/api.js
 
-// Fake API function that returns emergency contacts
+  async create(alert) {
+    const res = await fetch(`${BASE_URL}/api/alerts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(alert),
+    });
+    return res.json();
+  },
+
+  async remove(id) {
+    const res = await fetch(`${BASE_URL}/api/alerts/${id}`, {
+      method: "DELETE",
+    });
+    return res.json();
+  },
+};
+
+// -------------------- VOLUNTEERS --------------------
+export const Volunteers = {
+  async list() {
+    const res = await fetch(`${BASE_URL}/api/volunteers`);
+    return res.json();
+  },
+
+  async create(volunteer) {
+    const res = await fetch(`${BASE_URL}/api/volunteers`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(volunteer),
+    });
+    return res.json();
+  },
+
+  async remove(id) {
+    const res = await fetch(`${BASE_URL}/api/volunteers/${id}`, {
+      method: "DELETE",
+    });
+    return res.json();
+  },
+};
+
+// -------------------- TIPS --------------------
+export const Tips = {
+  async list() {
+    const res = await fetch(`${BASE_URL}/api/tips`);
+    return res.json();
+  },
+
+  async create(tip) {
+    const res = await fetch(`${BASE_URL}/api/tips`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tip),
+    });
+    return res.json();
+  },
+
+  async remove(id) {
+    const res = await fetch(`${BASE_URL}/api/tips/${id}`, {
+      method: "DELETE",
+    });
+    return res.json();
+  },
+};
+
+// -------------------- EMERGENCY CONTACTS --------------------
+// If you want to serve contacts from backend later, you can do the same.
+// For now, keep them static:
 const contactsData = [
   { _id: 1, name: "Police", phone: "100" },
   { _id: 2, name: "Fire Department", phone: "101" },
-  { _id: 3, name: "Ambulance", phone: "102" }
+  { _id: 3, name: "Ambulance", phone: "102" },
 ];
 
 export const Contacts = {
-  list: async () => {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(contactsData), 500);
+  async list() {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(contactsData), 300);
     });
-  }
+  },
 };

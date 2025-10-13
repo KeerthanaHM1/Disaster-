@@ -1,78 +1,39 @@
 import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Temporary in-memory DB
-let alerts = [];
-let volunteers = [];
-let tips = [];
+// ✅ 1. Connect to MongoDB
+mongoose.connect("mongodb://127.0.0.1:27017/disasterdb")
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log(err));
 
-// ✅ Root
-app.get("/", (req, res) => {
-  res.send("🚨 Disaster Alert Backend is running!");
+// ✅ 2. Define Schema and Model
+const alertSchema = new mongoose.Schema({
+  title: String,
+  message: String,
+  type: String,      // e.g. flood, fire, medical
+  createdAt: { type: Date, default: Date.now },
 });
 
-// ---- Alerts ----
-app.post("/api/alerts", (req, res) => {
-  const { title, message } = req.body;
-  if (!title || !message) {
-    return res.status(400).json({ error: "Title and message required" });
-  }
-  const newAlert = { id: Date.now(), title, message };
-  alerts.push(newAlert);
-  res.json(newAlert);
+const Alert = mongoose.model("Alert", alertSchema);
+
+// ✅ 3. API Routes
+
+// Get all alerts (for all users)
+app.get("/api/alerts", async (req, res) => {
+  const alerts = await Alert.find().sort({ createdAt: -1 });
+  res.json(alerts);
 });
 
-app.get("/api/alerts", (req, res) => res.json(alerts));
-
-app.delete("/api/alerts/:id", (req, res) => {
-  const id = Number(req.params.id);
-  alerts = alerts.filter((a) => a.id !== id);
-  res.json({ success: true });
+// Create a new alert (for volunteers/admin)
+app.post("/api/alerts", async (req, res) => {
+  const newAlert = new Alert(req.body);
+  await newAlert.save();
+  res.status(201).json(newAlert);
 });
 
-// ---- Volunteers ----
-app.post("/api/volunteers", (req, res) => {
-  const { name, role, contact, email } = req.body;
-  if (!name || !role || !contact || !email) {
-    return res.status(400).json({ error: "All fields required" });
-  }
-  const newVolunteer = { id: Date.now(), name, role, contact, email };
-  volunteers.push(newVolunteer);
-  res.json(newVolunteer);
-});
-
-app.get("/api/volunteers", (req, res) => res.json(volunteers));
-
-app.delete("/api/volunteers/:id", (req, res) => {
-  const id = Number(req.params.id);
-  volunteers = volunteers.filter((v) => v.id !== id);
-  res.json({ success: true });
-});
-
-// ---- Tips ----
-app.post("/api/tips", (req, res) => {
-  const { title, content } = req.body;
-  if (!title || !content) {
-    return res.status(400).json({ error: "All fields required" });
-  }
-  const newTip = { id: Date.now(), title, content };
-  tips.push(newTip);
-  res.json(newTip);
-});
-
-app.get("/api/tips", (req, res) => res.json(tips));
-
-app.delete("/api/tips/:id", (req, res) => {
-  const id = Number(req.params.id);
-  tips = tips.filter((t) => t.id !== id);
-  res.json({ success: true });
-});
-
-// ---- Start Server ----
-app.listen(5000, () =>
-  console.log("🚨 Disaster Alert Backend is running on http://localhost:5000")
-);
+app.listen(5000, () => console.log("✅ Server running on port 5000"));
