@@ -7,6 +7,8 @@ import EmergencyContacts from "./components/EmergencyContacts.jsx";
 import TipsGrid from "./components/TipsGrid.jsx";
 import LoginForm from "./components/LoginForm.jsx";
 import AdminDashboard from "./components/AdminDashboard.jsx";
+import SidebarLayout from "./components/SidebarLayout.jsx";
+
 import { store } from "./store.js";
 
 export default function App() {
@@ -39,10 +41,16 @@ function MainApp({ user, setUser }) {
   };
 
   const handleLogout = () => {
+  const user = store.getUser();
+    if (user) {
+      localStorage.removeItem(`emergencyContacts_${user.email}`);
+    }
     store.setUser(null);
     setUser(null);
     navigate("/home");
   };
+
+
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
@@ -71,12 +79,12 @@ function MainApp({ user, setUser }) {
           element={
             <>
               <AlertFeed />
-              <EmergencyContacts />
               <VolunteerForm />
               <TipsGrid />
             </>
           }
         />
+
 
         {/* Login Page */}
         <Route
@@ -84,15 +92,19 @@ function MainApp({ user, setUser }) {
           element={<LoginForm />}
         />
 
-        {/* Protected Admin Dashboard */}
+       
         <Route
-          path="/dashboard"
+          path="/"
           element={
             <ProtectedRoute>
-              <AdminDashboard />
+              <SidebarLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="emergency-contact" element={<EmergencyContacts />} />
+        </Route>
+
 
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/home" replace />} />
